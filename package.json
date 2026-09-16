@@ -1,0 +1,13 @@
+{
+  "name": "r2-readonly-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev -c wrangler.local.jsonc",
+    "deploy:check": "wrangler deploy --dry-run --keep-vars --strict",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

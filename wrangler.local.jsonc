@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "r2-readonly-worker-local",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-16",
+  "r2_buckets": [
+    { "binding": "R2", "bucket_name": "local-r2-files" }
+  ]
+}
