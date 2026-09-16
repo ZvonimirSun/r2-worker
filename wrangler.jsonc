@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "r2-readonly-worker",
+  "name": "r2-worker",
   "main": "src/index.js",
   "compatibility_date": "2026-09-16",
   "keep_vars": true,
