@@ -48,7 +48,7 @@ test("deploy refuses to upload without the existing R2 binding", async () => {
 });
 
 test("deploy refuses missing credentials and detects unexpected settings changes", async () => {
-  await assert.rejects(deploy({ accountId: "", token }), /CLOUDFLARE_ACCOUNT_ID/);
+  await assert.rejects(deploy({ accountId: "", token: "" }), /CLOUDFLARE_API_TOKEN/);
   let calls = 0;
   const request = async (_url, options) => {
     calls++;
@@ -58,4 +58,30 @@ test("deploy refuses missing credentials and detects unexpected settings changes
   await assert.rejects(deploy({
     accountId, token, request, readBundle: async () => Buffer.from("code"),
   }), /settings changed/);
+});
+
+test("deploy discovers the sole online Worker without an account ID variable", async () => {
+  const calls = [];
+  const request = async (url, options) => {
+    calls.push([new URL(url).pathname, options.method || "GET"]);
+    if (url.includes("/accounts?")) return apiResponse([{ id: accountId }]);
+    return apiResponse(options.method === "PUT" ? {} : settings);
+  };
+  const result = await deploy({
+    accountId: "", token, request, readBundle: async () => Buffer.from("code"),
+  });
+  assert.equal(result.bucketName, "online-bucket");
+  assert.deepEqual(calls.map(([, method]) => method), ["GET", "GET", "PUT", "GET"]);
+});
+
+test("ambiguous online Workers stop before uploading", async () => {
+  const calls = [];
+  const request = async (url, options) => {
+    calls.push(options.method || "GET");
+    return apiResponse(url.includes("/accounts?") ? [{ id: accountId }, { id: "b".repeat(32) }] : settings);
+  };
+  await assert.rejects(deploy({
+    accountId: "", token, request, readBundle: async () => Buffer.from("code"),
+  }), /found 2/);
+  assert.deepEqual(calls, ["GET", "GET", "GET"]);
 });
